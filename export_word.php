@@ -7,7 +7,6 @@ require 'config/database.php';
 $phpWord = new \PhpOffice\PhpWord\PhpWord();
 
 // Menambahkan properti dokumen
-// $phpWord->getSettings()->setThemeFontLang(new \PhpOffice\PhpWord\Style\Language(\PhpOffice\PhpWord\Style\Language::IN_ID)); // Baris ini dinonaktifkan
 $properties = $phpWord->getDocInfo();
 $properties->setCreator('Sistem Laporan Telawang');
 $properties->setTitle('Laporan Kegiatan Rumah Pilah Sampah');
@@ -29,19 +28,31 @@ $header->addText('Kelurahan Telawang', ['size' => 12], ['alignment' => \PhpOffic
 // 5. Mengambil Data dari Database
 // ============================================== -->
 $filter_query = "";
+$nama_filter = "Semua Periode"; // Nilai default
 
 // Cek tombol mana yang diklik untuk menentukan filter aktif
 if (isset($_GET['terapkan_tanggal']) && !empty($_GET['start_date']) && !empty($_GET['end_date'])) {
     $start_date = $conn->real_escape_string($_GET['start_date']);
     $end_date = $conn->real_escape_string($_GET['end_date']);
     $filter_query = " WHERE tanggal BETWEEN '{$start_date}' AND '{$end_date}'";
+    $nama_filter = "Periode " . date('d-m-Y', strtotime($start_date)) . " sd " . date('d-m-Y', strtotime($end_date));
 } 
 // Jika tombol filter tanggal tidak diklik, gunakan filter cepat
 else {
     $filter_value = $_GET['filter'] ?? 'semua';
-    if ($filter_value == 'minggu') { $filter_query = " WHERE YEARWEEK(tanggal, 1) = YEARWEEK(CURDATE(), 1)"; }
-    elseif ($filter_value == 'bulan') { $filter_query = " WHERE MONTH(tanggal) = MONTH(CURDATE()) AND YEAR(tanggal) = YEAR(CURDATE())"; }
-    elseif ($filter_value == 'tahun') { $filter_query = " WHERE YEAR(tanggal) = YEAR(CURDATE())"; }
+    if ($filter_value == 'minggu') { 
+        $filter_query = " WHERE YEARWEEK(tanggal, 1) = YEARWEEK(CURDATE(), 1)"; 
+        $nama_filter = "Minggu Ini";
+    }
+    elseif ($filter_value == 'bulan') { 
+        $filter_query = " WHERE MONTH(tanggal) = MONTH(CURDATE()) AND YEAR(tanggal) = YEAR(CURDATE())";
+        $nama_filter = "Bulan Ini";
+    }
+    elseif ($filter_value == 'tahun') { 
+        $filter_query = " WHERE YEAR(tanggal) = YEAR(CURDATE())";
+        $nama_filter = "Tahun Ini";
+    }
+    // Jika 'semua', maka nilai default "Semua Periode" akan digunakan
 }
 
 $sort_order = isset($_GET['sort']) && $_GET['sort'] == 'asc' ? 'ASC' : 'DESC';
@@ -79,17 +90,11 @@ if ($result && $result->num_rows > 0) {
         $cellImage1 = $table->addCell(5000);
         $cellImage2 = $table->addCell(5000);
 
-        // =======================================================
-        // PERBAIKAN UKURAN GAMBAR DI SINI
-        // =======================================================
         if (!empty($row['foto1']) && file_exists('uploads/' . $row['foto1'])) {
-            // Gunakan ukuran pixel yang sama persis dengan file yang di-resize
             $cellImage1->addImage('uploads/' . $row['foto1'], ['width' => 245, 'height' => 208, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
         }
         if (!empty($row['foto2']) && file_exists('uploads/' . $row['foto2'])) {
-            // Gunakan ukuran pixel yang sama persis dengan file yang di-resize
-            // CORRECT CODE
-        $cellImage2->addImage('uploads/' . $row['foto2'], ['width' => 245, 'height' => 208, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+            $cellImage2->addImage('uploads/' . $row['foto2'], ['width' => 245, 'height' => 208, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
         }
         
         $section->addTextBreak(1);
@@ -105,7 +110,12 @@ if ($result && $result->num_rows > 0) {
 $conn->close();
 
 // 8. Simpan dan Kirim File ke Browser
-$filename = "Laporan-Kegiatan-Pilah-Sampah.docx";
+// Membersihkan nama filter agar aman digunakan sebagai nama file
+$nama_file_bersih = str_replace(' ', '-', $nama_filter); // Ganti spasi dengan strip
+$nama_file_bersih = preg_replace('/[^A-Za-z0-9\-]/', '', $nama_file_bersih); // Hapus karakter ilegal
+
+$filename = "Laporan-Kegiatan-{$nama_file_bersih}.docx";
+
 header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 header('Content-Disposition: attachment;filename="' . $filename . '"');
 header('Cache-Control: max-age=0');
