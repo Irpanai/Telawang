@@ -14,14 +14,13 @@ date_default_timezone_set('Asia/Makassar');
 
     <meta name="theme-color" content="#2c5282">
 
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
         :root{--primary-color:#2c5282;--secondary-color:#276749;--background-color:#f7fafc;--card-bg-color:#fff;--text-color:#2d3748;--text-color-light:#718096;--border-color:#e2e8f0;--shadow-color:rgba(45,55,72,.1)}
         *{box-sizing:border-box}
-        body{font-family:'Poppins',sans-serif;background-color:var(--background-color);margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:2rem}
+        body{font-family:'Poppins',sans-serif;background-color:var(--background-color);margin:0;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:100vh;padding:2rem}
         .main-container{display:grid;grid-template-columns:1fr 1.5fr;max-width:1000px;width:100%;background-color:var(--card-bg-color);border-radius:16px;box-shadow:0 10px 30px var(--shadow-color);overflow:hidden}
         .info-panel{position:relative;background-image:url(assets/foto.jpg);background-size:cover;background-position:center;color:#fff;padding:3rem;display:flex;flex-direction:column;justify-content:center;text-align:center;z-index:1}
         .info-panel::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background-color:rgba(44,82,130,.7);z-index:-1}
@@ -52,6 +51,16 @@ date_default_timezone_set('Asia/Makassar');
         .btn:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.15)}
         .btn-action{background-color:var(--secondary-color)}.btn-action:hover{background-color:#22543d}
         .btn-primary{background-color:var(--primary-color)}.btn-primary:hover{background-color:#2a4365}
+        
+        /* Style untuk Footer */
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-color-light);
+            font-size: 0.875rem;
+            line-height: 1.6; /* Menambahkan jarak antar baris */
+        }
+        
         @media (max-width:800px){.main-container{grid-template-columns:1fr}.info-panel{display:none}.form-panel,body{padding:1.5rem}}
     </style>
 </head>
@@ -96,6 +105,10 @@ date_default_timezone_set('Asia/Makassar');
             </form>
         </div>
     </div>
+
+    <footer>
+        <p>&copy; <?php echo date('Y'); ?> Rumah Pilah Sampah Telawang. All Rights Reserved.<br>Created by Harryadi Firman</p>
+    </footer>
 
     <script>
         const fotoInput = document.getElementById('foto');
